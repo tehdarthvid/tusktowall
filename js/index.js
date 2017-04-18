@@ -134,18 +134,20 @@ function addImagesFromToots() {
     	var content = document.getElementById("grid");
         for (var i = 0; i < json.length; i++) {
         	for (var j = 0; j < json[i].media_attachments.length; j++) {
-        		var urlPreview = json[i].media_attachments[j].preview_url;
-				if (null == document.getElementById(urlPreview)) {					
-					// TODO: Add reduction code here when the height can be computed.
-					//console.log(window.innerHeight);
-					var div = document.createElement("div");
-					div.id = urlPreview;
+        		if ("image" == json[i].media_attachments[j].type) {
+					var urlPreview = json[i].media_attachments[j].preview_url;
+					if (null == document.getElementById(urlPreview)) {					
+						// TODO: Add reduction code here when the height can be computed.
+						//console.log(window.innerHeight);
+						var div = document.createElement("div");
+						div.id = urlPreview;
 									
-					var imgTemp = new Image();
-					imgTemp.src = urlPreview;
+						var imgTemp = new Image();
+						imgTemp.src = urlPreview;
 					
-					addResizedImages(imgTemp, div, json[i]);
-					numImagesThisRound++;
+						addResizedImages(imgTemp, div, json[i]);
+						numImagesThisRound++;
+					}
 				}
         	}
         }
