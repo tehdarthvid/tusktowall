@@ -39,7 +39,7 @@ function setParamsFromURL() {
 	urlMastoInstance = getParameterByName("instance");
 	if (!urlMastoInstance) {
 		urlMastoInstance = "mastodon.social";
-		window.location.href = window.location.href + "?instance=mastodon.social";
+//		window.location.href = window.location.href + "?instance=mastodon.social";
 	}
 	console.log("instance: " + urlMastoInstance);
 	if ("false" == getParameterByName("local")) {
@@ -51,6 +51,7 @@ function setParamsFromURL() {
 	}
 	console.log("isVisibleNSFW: " + isVisibleNSFW);
 
+	$('#ebInstance').val(urlMastoInstance);
 }
 
 function regEventHandlers() {

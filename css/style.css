@@ -23,6 +23,11 @@
 	float: left;
 }
 
+.inputInstance {
+	float: left;
+	color: gray;
+}
+
 .navLinks {
 	float: right;
 }
