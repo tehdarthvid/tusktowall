@@ -1,5 +1,6 @@
 /* by @darthvid@niu.moe, (c) 2017 */
 
+// lib convenience vars
 var grid = document.querySelector('.grid');
 var layout = new Isotope(grid, {
 		itemSelector: '.grid-item',
@@ -8,9 +9,16 @@ var layout = new Isotope(grid, {
 			gutter: 5
 		}
 	});
+
+// "constants" (but may change :P)
 var msReload = 6000;
+var listBlockTags = ['NSFW', 'EROE', 'EROGE', 'おっぱい'];
+
+// QueryParams
 var urlMastoInstance = "";
-var boolLocalTimeline = true;
+var isLocalTimeline = true;
+var isVisibleNSFW = false;
+
 
 window.onload = function() {
 	initThisThang();
@@ -22,7 +30,9 @@ window.onload = function() {
 function initThisThang() {
 	setParamsFromURL();
 	console.log("https://" + urlMastoInstance + "/api/v1/timelines/public"
-		+ (boolLocalTimeline ? "?local=true" : ""));
+		+ (isLocalTimeline ? "?local=true" : ""));
+	setVisibilityNSFW(isVisibleNSFW);
+	regEventHandlers();
 }
 
 function setParamsFromURL() {
@@ -33,10 +43,20 @@ function setParamsFromURL() {
 	}
 	console.log("instance: " + urlMastoInstance);
 	if ("false" == getParameterByName("local")) {
-		boolLocalTimeline = false;
+		isLocalTimeline = false;
 	}
-	console.log("local timeline: " + boolLocalTimeline);
+	console.log("local timeline: " + isLocalTimeline);
+	if ("true" == getParameterByName("isVisibleNSFW")) {
+		isVisibleNSFW = true;
+	}
+	console.log("isVisibleNSFW: " + isVisibleNSFW);
+
 }
+
+function regEventHandlers() {
+	document.getElementById("btnNSFW").addEventListener("click", toggleNSFW);
+}
+
 
 function prependContent(content) {
 	var fragment = document.createDocumentFragment();
@@ -45,24 +65,70 @@ function prependContent(content) {
 	layout.prepended(content);
 }
 
+function isNSFW(toot) {
+	var boolNSFW = toot.sensitive;
+	if (!boolNSFW) {
+		toot.tags.forEach(function(tag) {
+			if (-1 < listBlockTags.indexOf(tag.name.toUpperCase())) {
+				boolNSFW = true;
+				console.log("It's " + tag.name.toUpperCase() + "!");
+			}
+			console.log(tag.name.toUpperCase());
+		});
+	}
+	return boolNSFW;
+}
+
 function addResizedImages(img, div, toot) {
 	img.onload = function() {
+		var strTagNSFW = "SFW";
 //		console.log(img.src);
 		var newWidth = img.width / 3;
 		img.width = newWidth;
-		var link = document.createElement('a');
+		var link = document.createElement("a");
 		link.setAttribute("href", toot.url);
 		link.setAttribute("target", "_blank");
-// TODO: Add metadata to the div future Isotope filtering.
+		
+		if (isNSFW(toot)) {
+			strTagNSFW = "NSFW";
+//	TODO: I want to remove these, but it's the only thing making the border exact (without gutter).
+			div.style.width = newWidth + "px";
+			div.style.height = (img.height / 3) + "px";
+			div.style.border = "thick solid #009999";
+			if (!isVisibleNSFW) {
+				img.style.visibility = "hidden";
+			}
+//			img.style.visibility = (isVisibleNSFW ? "visible" : "hidden");
+		} 
+		
+		img.className = "img" + strTagNSFW;
+		
 		link.appendChild(img);
+		div.className = "grid-item";
 		div.appendChild(link);
 		prependContent(div);
 	}
 }
 
+
+function toggleNSFW() {
+	isVisibleNSFW = !isVisibleNSFW;
+	setVisibilityNSFW(isVisibleNSFW);
+}
+
+function setVisibilityNSFW(isVisible) {
+	if (isVisible) {
+		$(".imgNSFW").css("visibility", "visible");
+		$("#btnNSFW").html("#NSFW");
+	} else {
+		$(".imgNSFW").css("visibility", "hidden");
+		$("#btnNSFW").html("#SFW");
+	}
+}
+
 function addImagesFromToots() {
 	$.getJSON("https://" + urlMastoInstance + "/api/v1/timelines/public"
-		+ (boolLocalTimeline ? "?local=true" : ""),
+		+ (isLocalTimeline ? "?local=true" : ""),
     function (json) {
     	var numImagesThisRound = 0;
     	var content = document.getElementById("grid");
@@ -73,7 +139,6 @@ function addImagesFromToots() {
 					// TODO: Add reduction code here when the height can be computed.
 					//console.log(window.innerHeight);
 					var div = document.createElement("div");
-					div.className = "grid-item";
 					div.id = urlPreview;
 									
 					var imgTemp = new Image();
