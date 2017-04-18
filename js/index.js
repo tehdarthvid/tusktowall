@@ -98,7 +98,6 @@ function addResizedImages(img, div, toot) {
 			if (!isVisibleNSFW) {
 				img.style.visibility = "hidden";
 			}
-//			img.style.visibility = (isVisibleNSFW ? "visible" : "hidden");
 		} 
 		
 		img.className = "img" + strTagNSFW;
@@ -120,9 +119,11 @@ function setVisibilityNSFW(isVisible) {
 	if (isVisible) {
 		$(".imgNSFW").css("visibility", "visible");
 		$("#btnNSFW").html("#NSFW");
+		$("#btnNSFW").css("color", "red");
 	} else {
 		$(".imgNSFW").css("visibility", "hidden");
-		$("#btnNSFW").html("#SFW");
+		$("#btnNSFW").html('supposedly "#sfw"');
+		$("#btnNSFW").css("color", "black");
 	}
 }
 

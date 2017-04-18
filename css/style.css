@@ -19,6 +19,40 @@
 	border: 2px solid #b6b5b4;
 }
 
+.button-group {
+	float: left;
+}
+
+.navLinks {
+	float: right;
+}
+
+#header:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
 body {
   background-color: black;
+}
+
+a:link {
+    text-decoration: none;
+    color: white;
+}
+
+a:visited {
+    text-decoration: none;
+    color: white;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: gray;
+}
+
+a:active {
+    text-decoration: underline;
+    color: gray;
 }
