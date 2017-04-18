@@ -12,4 +12,5 @@ Uses [Isotope](http://isotope.metafizzy.co/) for the layout library.
 	* default: "mastodon.social"
 * [optional] local = [true | false]
 	* default: true
-	
+* [optional] isVisibleNSFW = [true | false]
+	* default: false
