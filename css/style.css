@@ -1,0 +1,24 @@
+/* by @darthvid@niu.moe, (c) 2017 */
+
+/* "clear fix", is this really needed? */
+.grid:after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.grid-item {
+/*
+	float: left;
+	background: #e6e5e4;
+	border: 2px solid #b6b5b4;
+*/
+}
+
+.grid-item:hover {
+	border: 2px solid #b6b5b4;
+}
+
+body {
+  background-color: black;
+}
