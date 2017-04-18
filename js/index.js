@@ -118,11 +118,11 @@ function toggleNSFW() {
 function setVisibilityNSFW(isVisible) {
 	if (isVisible) {
 		$(".imgNSFW").css("visibility", "visible");
-		$("#btnNSFW").html("swaitch to supposedly #SFW");
+		$("#btnNSFW").html("switch to supposedly #SFW");
 		$("#btnNSFW").css("color", "red");
 	} else {
 		$(".imgNSFW").css("visibility", "hidden");
-		$("#btnNSFW").html('swtich to #nsfw');
+		$("#btnNSFW").html('reveal #nsfw');
 		$("#btnNSFW").css("color", "black");
 	}
 }
