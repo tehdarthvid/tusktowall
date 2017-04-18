@@ -1,11 +1,14 @@
 /* by @darthvid@niu.moe, (c) 2017 */
 
 var grid = document.querySelector('.grid');
-// TODO: Convert to Isotope for NSFW filtering, but still use Packery bin packing algo.
-var layout = new Packery(grid, {
-	itemSelector: '.grid-item',
-	gutter: 5,
+var layout = new Isotope(grid, {
+		itemSelector: '.grid-item',
+		layoutMode: 'packery',
+		packery: {
+			gutter: 5
+		}
 	});
+var msReload = 6000;
 var urlMastoInstance = "";
 var boolLocalTimeline = true;
 
@@ -44,12 +47,13 @@ function prependContent(content) {
 
 function addResizedImages(img, div, toot) {
 	img.onload = function() {
-//		console.log(imgTemp.src);
+//		console.log(img.src);
 		var newWidth = img.width / 3;
 		img.width = newWidth;
 		var link = document.createElement('a');
 		link.setAttribute("href", toot.url);
 		link.setAttribute("target", "_blank");
+// TODO: Add metadata to the div future Isotope filtering.
 		link.appendChild(img);
 		div.appendChild(link);
 		prependContent(div);
@@ -68,8 +72,6 @@ function addImagesFromToots() {
 				if (null == document.getElementById(urlPreview)) {					
 					// TODO: Add reduction code here when the height can be computed.
 					//console.log(window.innerHeight);
-					// TODO: Add metadata to the div future filtering.
-					//console.log(json[i].sensitive);
 					var div = document.createElement("div");
 					div.className = "grid-item";
 					div.id = urlPreview;
@@ -117,5 +119,5 @@ function runLoop() {
 	setInterval(function() {
 //		prependContent(generateRandomContent());
 		addImagesFromToots();
-	}, 6000);
+	}, msReload);
 }
