@@ -18,6 +18,7 @@ var listBlockTags = ['NSFW', 'EROE', 'EROGE', 'おっぱい'];
 var urlMastoInstance = "";
 var isLocalTimeline = true;
 var isVisibleNSFW = false;
+var percentImgSize = 0.33;
 
 
 window.onload = function() {
@@ -33,25 +34,6 @@ function initThisThang() {
 		+ (isLocalTimeline ? "?local=true" : ""));
 	setVisibilityNSFW(isVisibleNSFW);
 	regEventHandlers();
-}
-
-function setParamsFromURL() {
-	urlMastoInstance = getParameterByName("instance");
-	if (!urlMastoInstance) {
-		urlMastoInstance = "mastodon.social";
-//		window.location.href = window.location.href + "?instance=mastodon.social";
-	}
-	console.log("instance: " + urlMastoInstance);
-	if ("false" == getParameterByName("local")) {
-		isLocalTimeline = false;
-	}
-	console.log("local timeline: " + isLocalTimeline);
-	if ("true" == getParameterByName("isVisibleNSFW")) {
-		isVisibleNSFW = true;
-	}
-	console.log("isVisibleNSFW: " + isVisibleNSFW);
-
-	$('#ebInstance').val(urlMastoInstance);
 }
 
 function regEventHandlers() {
@@ -84,7 +66,7 @@ function addResizedImages(img, div, toot) {
 	img.onload = function() {
 		var strTagNSFW = "SFW";
 //		console.log(img.src);
-		var newWidth = img.width / 3;
+		var newWidth = img.width * percentImgSize;
 		img.width = newWidth;
 		var link = document.createElement("a");
 		link.setAttribute("href", toot.url);
@@ -94,7 +76,7 @@ function addResizedImages(img, div, toot) {
 			strTagNSFW = "NSFW";
 //	TODO: I want to remove these, but it's the only thing making the border exact (without gutter).
 			div.style.width = newWidth + "px";
-			div.style.height = (img.height / 3) + "px";
+			div.style.height = (img.height * percentImgSize) + "px";
 			div.style.border = "thick solid #009999";
 			if (!isVisibleNSFW) {
 				img.style.visibility = "hidden";
@@ -157,6 +139,29 @@ function addImagesFromToots() {
     });
 }
 
+function setParamsFromURL() {
+	urlMastoInstance = getParameterByName("instance");
+	if (!urlMastoInstance) {
+		urlMastoInstance = "mastodon.social";
+//		window.location.href = window.location.href + "?instance=mastodon.social";
+	}
+	console.log("instance: " + urlMastoInstance);
+	if ("false" == getParameterByName("local")) {
+		isLocalTimeline = false;
+	}
+	console.log("local timeline: " + isLocalTimeline);
+	if ("true" == getParameterByName("nsfwvisible")) {
+		isVisibleNSFW = true;
+	}
+	console.log("isVisibleNSFW: " + isVisibleNSFW);
+	var paramImgSize = getParameterByName("imgsize");
+	if (20 < paramImgSize) {
+		percentImgSize = paramImgSize / 100;
+	}
+	console.log("percentImgSize: " + percentImgSize);
+
+	$('#ebInstance').val(urlMastoInstance);
+}
 
 
 // note: Taken from StackOverflow. ^^
