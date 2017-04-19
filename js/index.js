@@ -56,7 +56,7 @@ function isNSFW(toot) {
 				boolNSFW = true;
 				console.log("It's " + tag.name.toUpperCase() + "!");
 			}
-			console.log(tag.name.toUpperCase());
+//			console.log(tag.name.toUpperCase());
 		});
 	}
 	return boolNSFW;
@@ -77,11 +77,18 @@ function addResizedImages(img, div, toot) {
 //	TODO: I want to remove these, but it's the only thing making the border exact (without gutter).
 			div.style.width = newWidth + "px";
 			div.style.height = (img.height * percentImgSize) + "px";
-			div.style.border = "thick solid #009999";
+			div.style.border = "dashed thin #009999";
+			div.style.color = "#009999";
+			div.textContent = "#nsfw";			
+			div.style.lineHeight = div.style.height;
+			img.style.position = "absolute";
+			img.style.left = 0;
+			img.style.top = 0;
 			if (!isVisibleNSFW) {
 				img.style.visibility = "hidden";
 			}
-		} 
+		}
+//		else {link.appendChild(img);}
 		
 		img.className = "img" + strTagNSFW;
 		

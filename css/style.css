@@ -8,15 +8,12 @@
 }
 
 .grid-item {
-/*
-	float: left;
-	background: #e6e5e4;
-	border: 2px solid #b6b5b4;
-*/
+	text-align: center;
+	vertical-align: middle;
 }
 
 .grid-item:hover {
-	border: 2px solid #b6b5b4;
+	border: solid #b6b5b4;
 }
 
 .button-group {
