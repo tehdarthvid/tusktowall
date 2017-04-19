@@ -33,11 +33,13 @@ function initThisThang() {
 	console.log("https://" + urlMastoInstance + "/api/v1/timelines/public"
 		+ (isLocalTimeline ? "?local=true" : ""));
 	setVisibilityNSFW(isVisibleNSFW);
+	setLocalTimeline(isLocalTimeline);
 	regEventHandlers();
 }
 
 function regEventHandlers() {
 	document.getElementById("btnNSFW").addEventListener("click", toggleNSFW);
+	document.getElementById("btnLocal").addEventListener("click", toggleLocal);
 }
 
 
@@ -104,6 +106,11 @@ function toggleNSFW() {
 	isVisibleNSFW = !isVisibleNSFW;
 	setVisibilityNSFW(isVisibleNSFW);
 }
+function toggleLocal() {
+	isLocalTimeline = !isLocalTimeline;
+	setLocalTimeline(isLocalTimeline);
+	console.log("local timeline: " + isLocalTimeline);
+}
 
 function setVisibilityNSFW(isVisible) {
 	if (isVisible) {
@@ -117,7 +124,18 @@ function setVisibilityNSFW(isVisible) {
 	}
 }
 
+function setLocalTimeline(isTimelineLocal) {
+	if (isTimelineLocal) {
+		$("#btnLocal").html('local timeline');
+	} else {
+		$("#btnLocal").html("federated timeline");
+	}
+}
+
+
 function addImagesFromToots() {
+	console.log("https://" + urlMastoInstance + "/api/v1/timelines/public"
+		+ (isLocalTimeline ? "?local=true" : ""));
 	$.getJSON("https://" + urlMastoInstance + "/api/v1/timelines/public"
 		+ (isLocalTimeline ? "?local=true" : ""),
     function (json) {
@@ -160,12 +178,12 @@ function setParamsFromURL() {
 	if ("true" == getParameterByName("nsfwvisible")) {
 		isVisibleNSFW = true;
 	}
-	console.log("isVisibleNSFW: " + isVisibleNSFW);
+	console.log("show NSFW: " + isVisibleNSFW);
 	var paramImgSize = getParameterByName("imgsize");
 	if (20 < paramImgSize) {
 		percentImgSize = paramImgSize / 100;
 	}
-	console.log("percentImgSize: " + percentImgSize);
+	console.log("image size multiplier: " + percentImgSize);
 
 	$('#ebInstance').val(urlMastoInstance);
 }

@@ -20,6 +20,10 @@
 	float: left;
 }
 
+.editbox {
+	margin-bottom: 5px;
+}
+
 .inputInstance {
 	float: left;
 	color: gray;
