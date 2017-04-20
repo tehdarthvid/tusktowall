@@ -12,8 +12,8 @@
 	vertical-align: middle;
 }
 
-.grid-item:hover {
-	border: solid #b6b5b4;
+img:hover {
+	box-shadow: 0 0 5px 5px #b6b5b4;
 }
 
 .button-group {

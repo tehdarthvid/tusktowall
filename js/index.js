@@ -115,11 +115,11 @@ function toggleLocal() {
 function setVisibilityNSFW(isVisible) {
 	if (isVisible) {
 		$(".imgNSFW").css("visibility", "visible");
-		$("#btnNSFW").html("switch to supposedly #SFW");
+		$("#btnNSFW").html("hide #NSFW");
 		$("#btnNSFW").css("color", "red");
 	} else {
 		$(".imgNSFW").css("visibility", "hidden");
-		$("#btnNSFW").html('reveal #nsfw');
+		$("#btnNSFW").html('show #nsfw');
 		$("#btnNSFW").css("color", "black");
 	}
 }
