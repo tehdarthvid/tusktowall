@@ -4,6 +4,8 @@ Arranges images from a Mastodon instance into a wall in realtime. Some Mastodon 
 See it in action at:
 **[tusktowall.darthvid.com](http://tusktowall.darthvid.com)**
 
+I'm [darthvid](http://darthvid.com). You can find me in Mastodon [@darthvid@niu.moe](https://niu.moe/@darthvid).
+
 Nothing fancy. Just something for me to learn some front-end development. I've never done any front-end code before! :P
 
 Polls the given Mastodon instance for toots using the [Mastodon /timelines API](https://github.com/tootsuite/documentation/blob/master/Using-the-API/API.md#timelines). If the toot has an image, it's added to the wall and all images are re-arranged.
