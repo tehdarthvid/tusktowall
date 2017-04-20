@@ -1,7 +1,9 @@
 /* by @darthvid@niu.moe, (c) 2017 */
 
 // lib convenience vars
-var grid = document.querySelector('.grid');
+//var grid = document.querySelector('.grid');
+var grid = document.getElementById('content');
+
 var layout = new Isotope(grid, {
 		itemSelector: '.grid-item',
 		layoutMode: 'packery',
@@ -19,6 +21,9 @@ var urlMastoInstance = "";
 var isLocalTimeline = true;
 var isVisibleNSFW = false;
 var percentImgSize = 0.33;
+var maxNumImages = 75;
+var isDebugMode = false;
+var isPolling = true;
 
 
 window.onload = function() {
@@ -35,6 +40,18 @@ function initThisThang() {
 	setVisibilityNSFW(isVisibleNSFW);
 	setLocalTimeline(isLocalTimeline);
 	regEventHandlers();
+	if (isDebugMode) {
+		initDebug();
+	}
+}
+
+function initDebug() {
+	var btnIsPolling = document.createElement("button");
+	btnIsPolling.value = "polling";
+	btnIsPolling.name = "polling";
+	btnIsPolling.id = "btnIsPolling";
+	btnIsPolling.onclick = togglePolling;
+	document.getElementById("divDebug").appendChild(btnIsPolling);
 }
 
 function regEventHandlers() {
@@ -64,44 +81,6 @@ function isNSFW(toot) {
 	return boolNSFW;
 }
 
-function addResizedImages(img, div, toot) {
-	img.onload = function() {
-		var strTagNSFW = "SFW";
-//		console.log(img.src);
-		var newWidth = img.width * percentImgSize;
-		img.width = newWidth;
-		var link = document.createElement("a");
-		link.setAttribute("href", toot.url);
-		link.setAttribute("target", "_blank");
-		
-		if (isNSFW(toot)) {
-			strTagNSFW = "NSFW";
-//	TODO: I want to remove these, but it's the only thing making the border exact (without gutter).
-			div.style.width = newWidth + "px";
-			div.style.height = (img.height * percentImgSize) + "px";
-			div.style.border = "dashed thin #009999";
-			div.style.color = "#009999";
-			div.textContent = "#nsfw";			
-			div.style.lineHeight = div.style.height;
-			img.style.position = "absolute";
-			img.style.left = 0;
-			img.style.top = 0;
-			if (!isVisibleNSFW) {
-				img.style.visibility = "hidden";
-			}
-		}
-//		else {link.appendChild(img);}
-		
-		img.className = "img" + strTagNSFW;
-		
-		link.appendChild(img);
-		div.className = "grid-item";
-		div.appendChild(link);
-		prependContent(div);
-	}
-}
-
-
 function toggleNSFW() {
 	isVisibleNSFW = !isVisibleNSFW;
 	setVisibilityNSFW(isVisibleNSFW);
@@ -111,6 +90,12 @@ function toggleLocal() {
 	setLocalTimeline(isLocalTimeline);
 	console.log("local timeline: " + isLocalTimeline);
 }
+function togglePolling() {
+	isPolling = !isPolling;
+	setPolling(isPolling);
+	console.log("polling: " + isPolling);
+}
+
 
 function setVisibilityNSFW(isVisible) {
 	if (isVisible) {
@@ -132,10 +117,36 @@ function setLocalTimeline(isTimelineLocal) {
 	}
 }
 
+function setPolling(isPoll) {
+	if (isPoll) {
+		$("#btnPolling").html('polling');
+	} else {
+		$("#btnPolling").html("stopped");
+	}
+}
+
+function controlNumImg(){
+	var numChild = grid.childElementCount;
+//	console.log("img count " + numChild);
+	
+/*
+	// TODO:  Think about formula that can effectively select a number of imgs to delete.
+	//	Code below doesn't work because it loops faster than height can be computed in realtime.
+	//	Maybe: density at warning height to computer num at target height
+	while (grid.clientHeight > (screen.height * 0.8)) {
+		console.log(grid.clientHeight + " x " + screen.height * 1.5);
+		grid.lastChild.remove();
+	}
+*/
+
+	while (grid.childElementCount > maxNumImages) {
+		grid.lastChild.remove();
+		console.log(numChild + " images reduced to " + grid.childElementCount);
+	}
+}
 
 function addImagesFromToots() {
-	console.log("https://" + urlMastoInstance + "/api/v1/timelines/public"
-		+ (isLocalTimeline ? "?local=true" : ""));
+//	console.log("https://" + urlMastoInstance + "/api/v1/timelines/public" + (isLocalTimeline ? "?local=true" : ""));
 	$.getJSON("https://" + urlMastoInstance + "/api/v1/timelines/public"
 		+ (isLocalTimeline ? "?local=true" : ""),
     function (json) {
@@ -146,8 +157,6 @@ function addImagesFromToots() {
         		if ("image" == json[i].media_attachments[j].type) {
 					var urlPreview = json[i].media_attachments[j].preview_url;
 					if (null == document.getElementById(urlPreview)) {					
-						// TODO: Add reduction code here when the height can be computed.
-						//console.log(window.innerHeight);
 						var div = document.createElement("div");
 						div.id = urlPreview;
 									
@@ -163,6 +172,51 @@ function addImagesFromToots() {
         console.log("images added this round: " + numImagesThisRound);
     });
 }
+
+function addResizedImages(img, div, toot) {
+	img.onload = function() {
+		var strTagNSFW = "SFW";
+//		console.log(img.src);
+		var newWidth = img.width * percentImgSize;
+		img.width = newWidth;
+		var link = document.createElement("a");
+		link.setAttribute("href", toot.url);
+		link.setAttribute("target", "_blank");
+		
+		if (isNSFW(toot)) {
+			strTagNSFW = "NSFW";
+//	TODO: I want to remove these, but it's the only thing making the border exact (without gutter).
+			div.style.width = newWidth + "px";
+			div.style.height = (img.height * percentImgSize) + "px";
+			div.style.border = "dashed #009999";
+			div.style.color = "#009999";
+			div.textContent = "#nsfw";			
+			div.style.lineHeight = div.style.height;
+			img.style.position = "absolute";
+			img.style.left = 0;
+			img.style.top = 0;
+			if (!isVisibleNSFW) {
+				img.style.visibility = "hidden";
+			}
+		}
+		
+		img.className = "img" + strTagNSFW;
+		
+		link.appendChild(img);
+		div.className = "grid-item";
+		div.appendChild(link);
+		prependContent(div);
+		controlNumImg();
+		
+		if (toot.reblog) {
+			console.log("rb curr: " + div.id);
+			toot.media_attachments.forEach(function(oldMedia) {
+				console.log("rb old: "+ oldMedia.preview_url);
+			});
+		}
+	}
+}
+
 
 function setParamsFromURL() {
 	urlMastoInstance = getParameterByName("instance");
@@ -184,6 +238,15 @@ function setParamsFromURL() {
 		percentImgSize = paramImgSize / 100;
 	}
 	console.log("image size multiplier: " + percentImgSize);
+	var paramMaxImg = getParameterByName("maximg");
+	if (1 < paramMaxImg) {
+		maxNumImages = paramMaxImg;
+	}
+	console.log("max number of images: " + maxNumImages);
+	if ("true" == getParameterByName("debugmode")) {
+		isDebugMode = true;
+	}
+	console.log("debug mode: " + isDebugMode);
 
 	$('#ebInstance').val(urlMastoInstance);
 }
@@ -217,6 +280,8 @@ function generateRandomContent() {
 function runLoop() {
 	setInterval(function() {
 //		prependContent(generateRandomContent());
-		addImagesFromToots();
+		if (isPolling) {
+			addImagesFromToots();
+		}
 	}, msReload);
 }
