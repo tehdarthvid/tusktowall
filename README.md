@@ -1,5 +1,5 @@
-# tusktowall
-Arranges images from a Mastodon instance into a wall in realtime. Some Mastodon instances have so many toots passing the timeline that images just whizz by. #tusktowall polls theMastodon instance, gets any images it finds, then fills the screen with images in a nice, non-uniform, animated, packed layout.
+# Tusk To Wall
+#tusktowall arranges images from a Mastodon instance into a wall in realtime. Some Mastodon instances have so many toots passing the timeline that images just whizz by. #tusktowall polls theMastodon instance, gets any images it finds, then fills the screen with images in a nice, non-uniform, animated, packed layout.
 
 See it in action at:
 **[tusktowall.darthvid.com](http://tusktowall.darthvid.com)**
