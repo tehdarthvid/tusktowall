@@ -21,7 +21,7 @@ var urlMastoInstance = "";
 var isLocalTimeline = true;
 var isVisibleNSFW = false;
 var percentImgSize = 0.33;
-var maxNumImages = 75;
+var maxNumImages = 100;
 var isDebugMode = false;
 var isPolling = true;
 
@@ -59,14 +59,6 @@ function regEventHandlers() {
 	document.getElementById("btnLocal").addEventListener("click", toggleLocal);
 }
 
-
-function prependContent(content) {
-	var fragment = document.createDocumentFragment();
-	fragment.appendChild(content);
-	grid.insertBefore(fragment, grid.firstChild);
-	layout.prepended(content);
-}
-
 function isNSFW(toot) {
 	var boolNSFW = toot.sensitive;
 	if (!boolNSFW) {
@@ -100,10 +92,12 @@ function togglePolling() {
 function setVisibilityNSFW(isVisible) {
 	if (isVisible) {
 		$(".imgNSFW").css("visibility", "visible");
+//		$(".grid-NSFW").css("border", "dashed #990000");
 		$("#btnNSFW").html("hide #NSFW");
 		$("#btnNSFW").css("color", "red");
 	} else {
 		$(".imgNSFW").css("visibility", "hidden");
+//		$(".grid-NSFW").css("border", "dashed #009999");
 		$("#btnNSFW").html('show #nsfw');
 		$("#btnNSFW").css("color", "black");
 	}
@@ -125,10 +119,15 @@ function setPolling(isPoll) {
 	}
 }
 
+function prependContent(content) {
+	var fragment = document.createDocumentFragment();
+	fragment.appendChild(content);
+	grid.insertBefore(fragment, grid.firstChild);
+	layout.prepended(content);
+}
+
 function controlNumImg(){
 	var numChild = grid.childElementCount;
-//	console.log("img count " + numChild);
-	
 /*
 	// TODO:  Think about formula that can effectively select a number of imgs to delete.
 	//	Code below doesn't work because it loops faster than height can be computed in realtime.
@@ -138,11 +137,22 @@ function controlNumImg(){
 		grid.lastChild.remove();
 	}
 */
-
-	while (grid.childElementCount > maxNumImages) {
-		grid.lastChild.remove();
-		console.log(numChild + " images reduced to " + grid.childElementCount);
+	if (1 == (numChild - maxNumImages)) {
+		layout.remove(grid.lastChild);
+		console.log("img removed: -1 (" + numChild + ")");
 	}
+	else if (1 < (numChild - maxNumImages)) {
+		var prevChild = grid.lastChild.previousSibling;
+		var currChild = grid.lastChild;
+		for (var i = 0; i < (numChild - maxNumImages); i++ ) {
+			//console.log("deleting " + currChild.id);
+			layout.remove(currChild);
+			currChild = prevChild;
+			prevChild = currChild.previousSibling;
+		}
+		console.log("img -" + (numChild - maxNumImages) + " (" + numChild + ")");
+	}
+	layout.layout();
 }
 
 function addImagesFromToots() {
@@ -151,7 +161,8 @@ function addImagesFromToots() {
 		+ (isLocalTimeline ? "?local=true" : ""),
     function (json) {
     	var numImagesThisRound = 0;
-    	var content = document.getElementById("grid");
+    	var numImagesSofar = grid.childElementCount;
+//    	var content = document.getElementById("grid");
         for (var i = 0; i < json.length; i++) {
         	for (var j = 0; j < json[i].media_attachments.length; j++) {
         		if ("image" == json[i].media_attachments[j].type) {
@@ -169,7 +180,7 @@ function addImagesFromToots() {
 				}
         	}
         }
-        console.log("images added this round: " + numImagesThisRound);
+        console.log("img +" + numImagesThisRound + " (" + numImagesSofar + ")");
     });
 }
 
@@ -188,8 +199,6 @@ function addResizedImages(img, div, toot) {
 //	TODO: I want to remove these, but it's the only thing making the border exact (without gutter).
 			div.style.width = newWidth + "px";
 			div.style.height = (img.height * percentImgSize) + "px";
-			div.style.border = "dashed #009999";
-			div.style.color = "#009999";
 			div.textContent = "#nsfw";			
 			div.style.lineHeight = div.style.height;
 			img.style.position = "absolute";
@@ -198,15 +207,19 @@ function addResizedImages(img, div, toot) {
 			if (!isVisibleNSFW) {
 				img.style.visibility = "hidden";
 			}
+			else {
+//				div.style.border = "dashed #990000"
+			}
+			div.className = "grid-NSFW ";
 		}
 		
 		img.className = "img" + strTagNSFW;
 		
 		link.appendChild(img);
-		div.className = "grid-item";
+		div.className = div.className + "grid-item";
 		div.appendChild(link);
 		prependContent(div);
-		controlNumImg();
+		//controlNumImg();
 		
 		if (toot.reblog) {
 			console.log("rb curr: " + div.id);
@@ -280,6 +293,7 @@ function generateRandomContent() {
 function runLoop() {
 	setInterval(function() {
 //		prependContent(generateRandomContent());
+		controlNumImg();
 		if (isPolling) {
 			addImagesFromToots();
 		}
