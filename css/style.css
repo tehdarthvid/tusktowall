@@ -2,9 +2,9 @@
 
 /* "clear fix", is this really needed? */
 .grid:after {
-  content: '';
-  display: block;
-  clear: both;
+	content: '';
+	display: block;
+	clear: both;
 }
 
 .grid-NSFW {
@@ -36,31 +36,31 @@ img:hover {
 }
 
 #header:after {
-  content: '';
-  display: block;
-  clear: both;
+	content: '';
+	display: block;
+	clear: both;
 }
 
 body {
-  background-color: black;
+	background-color: black;
 }
 
 a:link {
-    text-decoration: none;
-    color: white;
+	text-decoration: none;
+	color: white;
 }
 
 a:visited {
-    text-decoration: none;
-    color: white;
+	text-decoration: none;
+	color: white;
 }
 
 a:hover {
-    text-decoration: underline;
-    color: gray;
+	text-decoration: underline;
+	color: gray;
 }
 
 a:active {
-    text-decoration: underline;
-    color: gray;
+	text-decoration: underline;
+	color: gray;
 }

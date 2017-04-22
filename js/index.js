@@ -25,10 +25,13 @@ var maxNumImages = 100;
 var isDebugMode = false;
 var isPolling = true;
 
+//globals
+var oldestTootID = null;
 
 window.onload = function() {
 	initThisThang();
 	addImagesFromToots();
+	backfillWall();
 	runLoop();
 }
 
@@ -126,6 +129,14 @@ function prependContent(content) {
 	layout.prepended(content);
 }
 
+function appendContent(content) {
+//	var fragment = document.createDocumentFragment();
+//	fragment.appendChild(content);
+	grid.appendChild(content);
+	layout.appended(content);
+}
+
+
 function controlNumImg(){
 	var numChild = grid.childElementCount;
 /*
@@ -139,7 +150,7 @@ function controlNumImg(){
 */
 	if (1 == (numChild - maxNumImages)) {
 		layout.remove(grid.lastChild);
-		console.log("img removed: -1 (" + numChild + ")");
+		console.log("img -1 (" + numChild + ")");
 	}
 	else if (1 < (numChild - maxNumImages)) {
 		var prevChild = grid.lastChild.previousSibling;
@@ -155,36 +166,59 @@ function controlNumImg(){
 	layout.layout();
 }
 
-function addImagesFromToots() {
-//	console.log("https://" + urlMastoInstance + "/api/v1/timelines/public" + (isLocalTimeline ? "?local=true" : ""));
-	$.getJSON("https://" + urlMastoInstance + "/api/v1/timelines/public"
-		+ (isLocalTimeline ? "?local=true" : ""),
-    function (json) {
-    	var numImagesThisRound = 0;
-    	var numImagesSofar = grid.childElementCount;
-//    	var content = document.getElementById("grid");
-        for (var i = 0; i < json.length; i++) {
-        	for (var j = 0; j < json[i].media_attachments.length; j++) {
-        		if ("image" == json[i].media_attachments[j].type) {
-					var urlPreview = json[i].media_attachments[j].preview_url;
-					if (null == document.getElementById(urlPreview)) {					
-						var div = document.createElement("div");
-						div.id = urlPreview;
-									
-						var imgTemp = new Image();
-						imgTemp.src = urlPreview;
-					
-						addResizedImages(imgTemp, div, json[i]);
-						numImagesThisRound++;
-					}
-				}
-        	}
-        }
-        console.log("img +" + numImagesThisRound + " (" + numImagesSofar + ")");
-    });
+function backfillWall() {
+	//home?max_id=2869056&limit=10
+	if ((1 < oldestTootID) && (grid.clientHeight < screen.height)){
+		addImagesFromToots(oldestTootID);
+	}
 }
 
-function addResizedImages(img, div, toot) {
+function addImagesFromToots(maxTootID) {
+	var url = "https://" + urlMastoInstance + "/api/v1/timelines/public?";
+	url += (isLocalTimeline ? "&local=true": "");
+	url += (maxTootID ? ("&limit=100&max_id=" + maxTootID): "");
+	console.log(url);
+	$.getJSON(url, function(json){addTootsMedia(json, (maxTootID ? true : false));});
+}
+
+function addTootsMedia(json, isAppend = false) {
+	var numImagesThisRound = 0;
+	var numImagesSofar = grid.childElementCount;
+	for (var i = 0; i < json.length; i++) {
+		for (var j = 0; j < json[i].media_attachments.length; j++) {
+		//<video autoplay loop src='/system/media_attachments/files/000/001/236/original/media.mp4?1492778745'>
+			if ("image" == json[i].media_attachments[j].type) {
+				var urlPreview = json[i].media_attachments[j].preview_url;
+				if (null == document.getElementById(urlPreview)) {					
+					var div = document.createElement("div");
+					div.id = urlPreview;
+			
+					var imgTemp = new Image();
+					imgTemp.src = urlPreview;
+
+					addResizedImages(imgTemp, div, json[i], isAppend);
+					numImagesThisRound++;
+				}
+			}
+		}
+	}
+	if ((null == oldestTootID) && (0 < json.length)) {
+		oldestTootID = json[json.length-1].id;
+	}
+	if ((0 < json.length) && (oldestTootID > json[json.length-1].id)) {
+		oldestTootID = json[json.length-1].id;
+	}
+	if (isAppend) {
+		console.log("img (" + numImagesSofar + ") +" + numImagesThisRound);
+	}
+	else {
+		console.log("img +" + numImagesThisRound + " (" + numImagesSofar + ")");
+	}
+	
+	return numImagesThisRound;
+}
+
+function addResizedImages(img, div, toot, isAppend = false) {
 	img.onload = function() {
 		var strTagNSFW = "SFW";
 //		console.log(img.src);
@@ -218,8 +252,12 @@ function addResizedImages(img, div, toot) {
 		link.appendChild(img);
 		div.className = div.className + "grid-item";
 		div.appendChild(link);
-		prependContent(div);
-		//controlNumImg();
+		if (isAppend) {
+			appendContent(div);
+		}
+		else {
+			prependContent(div);
+		}
 		
 		if (toot.reblog) {
 			console.log("rb curr: " + div.id);
@@ -296,6 +334,7 @@ function runLoop() {
 		controlNumImg();
 		if (isPolling) {
 			addImagesFromToots();
+			backfillWall();
 		}
 	}, msReload);
 }
