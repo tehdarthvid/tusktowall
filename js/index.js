@@ -20,7 +20,7 @@ var listBlockTags = ['NSFW', 'EROE', 'EROGE', 'おっぱい'];
 var urlMastoInstance = "";
 var isLocalTimeline = true;
 var isVisibleNSFW = false;
-var percentImgSize = 0.33;
+var percentImgSize = 0.40;
 var maxNumImages = 100;
 var isDebugMode = false;
 var isPolling = true;
@@ -130,44 +130,36 @@ function prependContent(content) {
 }
 
 function appendContent(content) {
-//	var fragment = document.createDocumentFragment();
-//	fragment.appendChild(content);
 	grid.appendChild(content);
 	layout.appended(content);
 }
 
 
 function controlNumImg(){
+	var numImagesSofar = grid.childElementCount;
+	var numImagesThisRound = 0;
 	var numChild = grid.childElementCount;
-/*
-	// TODO:  Think about formula that can effectively select a number of imgs to delete.
-	//	Code below doesn't work because it loops faster than height can be computed in realtime.
-	//	Maybe: density at warning height to computer num at target height
-	while (grid.clientHeight > (screen.height * 0.8)) {
-		console.log(grid.clientHeight + " x " + screen.height * 1.5);
-		grid.lastChild.remove();
-	}
-*/
-	if (1 == (numChild - maxNumImages)) {
-		layout.remove(grid.lastChild);
-		console.log("img -1 (" + numChild + ")");
-	}
-	else if (1 < (numChild - maxNumImages)) {
-		var prevChild = grid.lastChild.previousSibling;
+	var heightLine = screen.height * 1.5;
+//	console.log(grid.clientHeight + " x " + heightLine);
+	if (grid.clientHeight > heightLine) {
+		//console.log("let's check if there's anything to clean-up...")
 		var currChild = grid.lastChild;
-		for (var i = 0; i < (numChild - maxNumImages); i++ ) {
-			//console.log("deleting " + currChild.id);
-			layout.remove(currChild);
+		var prevChild = currChild.previousSibling;
+		while (prevChild) {
+			if ((currChild.getBoundingClientRect().top + window.scrollY) > heightLine) {
+//				console.log("deleting " + currChild.id);
+				layout.remove(currChild);
+				numImagesThisRound++;
+			}
 			currChild = prevChild;
 			prevChild = currChild.previousSibling;
 		}
-		console.log("img -" + (numChild - maxNumImages) + " (" + numChild + ")");
+		console.log("img -" + numImagesThisRound + " (" + numImagesSofar + ")");
 	}
 	layout.layout();
 }
 
 function backfillWall() {
-	//home?max_id=2869056&limit=10
 	if ((1 < oldestTootID) && (grid.clientHeight < screen.height)){
 		addImagesFromToots(oldestTootID);
 	}
@@ -222,7 +214,9 @@ function addResizedImages(img, div, toot, isAppend = false) {
 	img.onload = function() {
 		var strTagNSFW = "SFW";
 //		console.log(img.src);
-		var newWidth = img.width * percentImgSize;
+		var percentSize = percentImgSize;
+		var newWidth = img.width * percentSize;
+		console.log(img.width + " " + newWidth);
 		img.width = newWidth;
 		var link = document.createElement("a");
 		link.setAttribute("href", toot.url);
@@ -232,7 +226,7 @@ function addResizedImages(img, div, toot, isAppend = false) {
 			strTagNSFW = "NSFW";
 //	TODO: I want to remove these, but it's the only thing making the border exact (without gutter).
 			div.style.width = newWidth + "px";
-			div.style.height = (img.height * percentImgSize) + "px";
+			div.style.height = (img.height * percentSize) + "px";
 			div.textContent = "#nsfw";			
 			div.style.lineHeight = div.style.height;
 			img.style.position = "absolute";
