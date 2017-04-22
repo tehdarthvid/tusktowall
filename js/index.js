@@ -138,18 +138,16 @@ function appendContent(content) {
 function controlNumImg(){
 	var numImagesSofar = grid.childElementCount;
 	var numImagesThisRound = 0;
-	var numChild = grid.childElementCount;
+	var numChild = numImagesSofar;
 	var heightLine = screen.height * 1.5;
-//	console.log(grid.clientHeight + " x " + heightLine);
 	if (grid.clientHeight > heightLine) {
-		//console.log("let's check if there's anything to clean-up...")
 		var currChild = grid.lastChild;
 		var prevChild = currChild.previousSibling;
-		while (prevChild) {
+		while (prevChild && (20 < numChild)) {
 			if ((currChild.getBoundingClientRect().top + window.scrollY) > heightLine) {
-//				console.log("deleting " + currChild.id);
 				layout.remove(currChild);
 				numImagesThisRound++;
+				numChild--;
 			}
 			currChild = prevChild;
 			prevChild = currChild.previousSibling;
@@ -181,14 +179,13 @@ function addTootsMedia(json, isAppend = false) {
 		//<video autoplay loop src='/system/media_attachments/files/000/001/236/original/media.mp4?1492778745'>
 			if ("image" == json[i].media_attachments[j].type) {
 				var urlPreview = json[i].media_attachments[j].preview_url;
-				if (null == document.getElementById(urlPreview)) {					
-					var div = document.createElement("div");
-					div.id = urlPreview;
-			
+				if (null == document.getElementById(urlPreview)) {
+					// NOTE: Had to pass by value to make consistent with onload async.
+					//			The image needs to finish loading to get it's dimensions.
 					var imgTemp = new Image();
 					imgTemp.src = urlPreview;
-
-					addResizedImages(imgTemp, div, json[i], isAppend);
+					addResizedImages(imgTemp, json[i], isAppend);
+					//imgTemp.onload = addResizedImages(imgTemp, json[i], isAppend);
 					numImagesThisRound++;
 				}
 			}
@@ -210,23 +207,51 @@ function addTootsMedia(json, isAppend = false) {
 	return numImagesThisRound;
 }
 
-function addResizedImages(img, div, toot, isAppend = false) {
+function computeScaledImgDimensions(img) {
+	var currWidth = Math.floor(img.width * percentImgSize);
+	var currHeight = Math.floor(img.height * percentImgSize);
+	var maxDimension = Math.min(screen.width, screen.height) - 15;
+	var newWidth = currWidth;
+	var newHeight = currHeight;
+	
+	if (newWidth > newHeight) {
+		if (newWidth > maxDimension) {
+			newWidth = maxDimension;
+			newHeight = Math.floor((currHeight * newWidth) / currWidth);
+		}
+	}
+	else {
+		if (newHeight > maxDimension) {
+			newHeight = maxDimension;
+			newWidth = Math.floor((currWidth * newHeight) / currHeight);
+		}
+	}
+	
+	if ((0 == newHeight) || (0 == newWidth)) {
+		console.log(newWidth + " x " + newHeight);
+	}
+
+	return [newWidth, newHeight];
+}
+
+function addResizedImages(img, toot, isAppend = false) {
 	img.onload = function() {
+		var div = document.createElement("div");
 		var strTagNSFW = "SFW";
-//		console.log(img.src);
-		var percentSize = percentImgSize;
-		var newWidth = img.width * percentSize;
-		console.log(img.width + " " + newWidth);
-		img.width = newWidth;
 		var link = document.createElement("a");
 		link.setAttribute("href", toot.url);
 		link.setAttribute("target", "_blank");
+		div.id = img.src;
+
+		var [newWidth, newHeight] = computeScaledImgDimensions(img);
+//		console.log(newWidth + " x " + newHeight);
+		img.width = newWidth;
 		
 		if (isNSFW(toot)) {
 			strTagNSFW = "NSFW";
 //	TODO: I want to remove these, but it's the only thing making the border exact (without gutter).
 			div.style.width = newWidth + "px";
-			div.style.height = (img.height * percentSize) + "px";
+			div.style.height = newHeight + "px";
 			div.textContent = "#nsfw";			
 			div.style.lineHeight = div.style.height;
 			img.style.position = "absolute";
