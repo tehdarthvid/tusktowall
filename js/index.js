@@ -142,10 +142,13 @@ function controlNumImg(){
 	var heightLine = screen.height * 1.5;
 	if (grid.clientHeight > heightLine) {
 		var currChild = grid.lastChild;
+		var lastChild = currChild;
 		var prevChild = currChild.previousSibling;
 		while (prevChild && (20 < numChild)) {
 			if ((currChild.getBoundingClientRect().top + window.scrollY) > heightLine) {
-				layout.remove(currChild);
+				var tempChild = lastChild.previousSibling;
+				layout.remove(lastChild);
+				lastChild = tempChild;
 				numImagesThisRound++;
 				numChild--;
 			}
