@@ -170,7 +170,8 @@ function addImagesFromToots(maxTootID) {
 	var url = "https://" + urlMastoInstance + "/api/v1/timelines/public?";
 	url += (isLocalTimeline ? "&local=true": "");
 	url += (maxTootID ? ("&limit=100&max_id=" + maxTootID): "");
-	console.log(url);
+//	console.log(url);
+	// asyc
 	$.getJSON(url, function(json){addTootsMedia(json, (maxTootID ? true : false));});
 }
 
@@ -187,6 +188,7 @@ function addTootsMedia(json, isAppend = false) {
 					//			The image needs to finish loading to get it's dimensions.
 					var imgTemp = new Image();
 					imgTemp.src = urlPreview;
+					// async
 					addResizedImages(imgTemp, json[i], isAppend);
 					//imgTemp.onload = addResizedImages(imgTemp, json[i], isAppend);
 					numImagesThisRound++;
@@ -239,53 +241,52 @@ function computeScaledImgDimensions(img) {
 
 function addResizedImages(img, toot, isAppend = false) {
 	img.onload = function() {
-		var div = document.createElement("div");
-		var strTagNSFW = "SFW";
-		var link = document.createElement("a");
-		link.setAttribute("href", toot.url);
-		link.setAttribute("target", "_blank");
-		div.id = img.src;
+		var srcImg = img.src;
+		if (null == document.getElementById(srcImg)) {
+			var div = document.createElement("div");
+			var strTagNSFW = "SFW";
+			var link = document.createElement("a");
+			link.setAttribute("href", toot.url);
+			link.setAttribute("target", "_blank");
+			div.id = srcImg;
 
-		var [newWidth, newHeight] = computeScaledImgDimensions(img);
-//		console.log(newWidth + " x " + newHeight);
-		img.width = newWidth;
+			var [newWidth, newHeight] = computeScaledImgDimensions(img);
+	//		console.log(newWidth + " x " + newHeight);
+			img.width = newWidth;
 		
-		if (isNSFW(toot)) {
-			strTagNSFW = "NSFW";
-//	TODO: I want to remove these, but it's the only thing making the border exact (without gutter).
-			div.style.width = newWidth + "px";
-			div.style.height = newHeight + "px";
-			div.textContent = "#nsfw";			
-			div.style.lineHeight = div.style.height;
-			img.style.position = "absolute";
-			img.style.left = 0;
-			img.style.top = 0;
-			if (!isVisibleNSFW) {
-				img.style.visibility = "hidden";
+			if (isNSFW(toot)) {
+				strTagNSFW = "NSFW";
+	//	TODO: I want to remove these, but it's the only thing making the border exact (without gutter).
+				div.style.width = newWidth + "px";
+				div.style.height = newHeight + "px";
+				div.textContent = "#nsfw";			
+				div.style.lineHeight = div.style.height;
+				img.style.position = "absolute";
+				img.style.left = 0;
+				img.style.top = 0;
+				if (!isVisibleNSFW) {
+					img.style.visibility = "hidden";
+				}
+				else {
+	//				div.style.border = "dashed #990000"
+				}
+				div.className = "grid-NSFW ";
+			}
+		
+			img.className = "img" + strTagNSFW;
+		
+			link.appendChild(img);
+			div.className = div.className + "grid-item";
+			div.appendChild(link);
+			if (isAppend) {
+				appendContent(div);
 			}
 			else {
-//				div.style.border = "dashed #990000"
+				prependContent(div);
 			}
-			div.className = "grid-NSFW ";
-		}
-		
-		img.className = "img" + strTagNSFW;
-		
-		link.appendChild(img);
-		div.className = div.className + "grid-item";
-		div.appendChild(link);
-		if (isAppend) {
-			appendContent(div);
 		}
 		else {
-			prependContent(div);
-		}
-		
-		if (toot.reblog) {
-			console.log("rb curr: " + div.id);
-			toot.media_attachments.forEach(function(oldMedia) {
-				console.log("rb old: "+ oldMedia.preview_url);
-			});
+			console.log("dup " + srcImg);
 		}
 	}
 }
