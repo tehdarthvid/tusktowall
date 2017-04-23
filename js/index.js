@@ -123,15 +123,25 @@ function setPolling(isPoll) {
 }
 
 function prependContent(content) {
-	var fragment = document.createDocumentFragment();
-	fragment.appendChild(content);
-	grid.insertBefore(fragment, grid.firstChild);
-	layout.prepended(content);
+	if (null == document.getElementById(content.id)) {
+		var fragment = document.createDocumentFragment();
+		fragment.appendChild(content);
+		grid.insertBefore(fragment, grid.firstChild);
+		layout.prepended(content);
+	}
+	else {
+		console.log("caught dup stage e: " + content.id);
+	}
 }
 
 function appendContent(content) {
-	grid.appendChild(content);
-	layout.appended(content);
+	if (null == document.getElementById(content.id)) {
+		grid.appendChild(content);
+		layout.appended(content);
+	}
+	else {
+		console.log("caught dup stage e: " + content.id);
+	}
 }
 
 
@@ -286,7 +296,7 @@ function addResizedImages(img, toot, isAppend = false) {
 			}
 		}
 		else {
-			console.log("dup " + srcImg);
+			console.log("caught dup stage 2: " + srcImg);
 		}
 	}
 }
