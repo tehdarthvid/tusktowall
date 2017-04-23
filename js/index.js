@@ -27,6 +27,7 @@ var isPolling = true;
 
 //globals
 var oldestTootID = null;
+var ctrCurrAdded = 0;
 
 window.onload = function() {
 	initThisThang();
@@ -38,6 +39,7 @@ window.onload = function() {
 
 function initThisThang() {
 	setParamsFromURL();
+	document.title = "#tusktowall: " + urlMastoInstance;
 	console.log("https://" + urlMastoInstance + "/api/v1/timelines/public"
 		+ (isLocalTimeline ? "?local=true" : ""));
 	setVisibilityNSFW(isVisibleNSFW);
@@ -49,15 +51,17 @@ function initThisThang() {
 }
 
 function initDebug() {
-	var btnIsPolling = document.createElement("button");
-	btnIsPolling.value = "polling";
-	btnIsPolling.name = "polling";
+	/*
+	var btnIsPolling= document.createElement('button');
+	btnIsPolling.innerHTML = "-";
 	btnIsPolling.id = "btnIsPolling";
 	btnIsPolling.onclick = togglePolling;
-	document.getElementById("divDebug").appendChild(btnIsPolling);
+	document.getElementById("headerleft").insertBefore(btnIsPolling, document.getElementById("headerleft").firstChild);
+	*/
 }
 
 function regEventHandlers() {
+	document.getElementById("btnIsPolling").addEventListener("click", togglePolling);
 	document.getElementById("btnNSFW").addEventListener("click", toggleNSFW);
 	document.getElementById("btnLocal").addEventListener("click", toggleLocal);
 }
@@ -68,7 +72,7 @@ function isNSFW(toot) {
 		toot.tags.forEach(function(tag) {
 			if (-1 < listBlockTags.indexOf(tag.name.toUpperCase())) {
 				boolNSFW = true;
-				console.log("It's " + tag.name.toUpperCase() + "!");
+				console.log("found " + tag.name.toUpperCase() + "!");
 			}
 //			console.log(tag.name.toUpperCase());
 		});
@@ -116,9 +120,16 @@ function setLocalTimeline(isTimelineLocal) {
 
 function setPolling(isPoll) {
 	if (isPoll) {
-		$("#btnPolling").html('polling');
+		$("#btnIsPolling").html('-');
 	} else {
-		$("#btnPolling").html("stopped");
+		$("#btnIsPolling").html("x");
+	}
+}
+
+function updatePollingCount(n) {
+	if (isPolling) {
+		ctrCurrAdded += n;
+		$("#btnIsPolling").html("+" + ctrCurrAdded);
 	}
 }
 
@@ -167,7 +178,7 @@ function controlNumImg(){
 		}
 		console.log("img -" + numImagesThisRound + " (" + numImagesSofar + ")");
 	}
-	layout.layout();
+	//layout.layout();
 }
 
 function backfillWall() {
@@ -182,7 +193,20 @@ function addImagesFromToots(maxTootID) {
 	url += (maxTootID ? ("&limit=100&max_id=" + maxTootID): "");
 //	console.log(url);
 	// asyc
-	$.getJSON(url, function(json){addTootsMedia(json, (maxTootID ? true : false));});
+//	$.getJSON(url, function(json){});
+	$.ajax({
+		url: url,
+		dataType: 'json',
+		success: function( data ) {
+			addTootsMedia(data, (maxTootID ? true : false));
+		},
+		error: function( data ) {
+			var btnIsPolling = $("#btnIsPolling");
+			btnIsPolling.html("[e]");
+//			btnIsPolling.css('color', 'red')
+			console.log( "ERROR:  " + data );
+		}
+	});
 }
 
 function addTootsMedia(json, isAppend = false) {
@@ -218,6 +242,7 @@ function addTootsMedia(json, isAppend = false) {
 	else {
 		console.log("img +" + numImagesThisRound + " (" + numImagesSofar + ")");
 	}
+	updatePollingCount(numImagesThisRound);
 	
 	return numImagesThisRound;
 }
@@ -364,6 +389,8 @@ function generateRandomContent() {
 function runLoop() {
 	setInterval(function() {
 //		prependContent(generateRandomContent());
+		$("#btnIsPolling").html('-');
+		ctrCurrAdded = 0;
 		controlNumImg();
 		if (isPolling) {
 			addImagesFromToots();
