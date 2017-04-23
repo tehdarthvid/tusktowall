@@ -389,10 +389,10 @@ function generateRandomContent() {
 function runLoop() {
 	setInterval(function() {
 //		prependContent(generateRandomContent());
-		$("#btnIsPolling").html('-');
 		ctrCurrAdded = 0;
-		controlNumImg();
 		if (isPolling) {
+			$("#btnIsPolling").html('-');
+			controlNumImg();
 			addImagesFromToots();
 			backfillWall();
 		}
