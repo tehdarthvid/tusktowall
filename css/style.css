@@ -24,6 +24,7 @@ img:hover {
 
 .editbox {
 	margin-bottom: 5px;
+	margin-left: 5px;
 }
 
 .inputInstance {
@@ -35,11 +36,36 @@ img:hover {
 	float: right;
 }
 
-#header:after {
+#headerleft {
+	float: left;
+}
+
+#ebinstancebar {
+	float: left;
+}
+
+#headerright {
+	float: right;
+}
+
+#headerbar:after {
 	content: '';
 	display: block;
 	clear: both;
 }
+
+#btnIsPolling {
+	width: 35px;
+}
+
+#btnNSFW {
+	width: 85px;
+}
+
+#btnLocal {
+	width: 115px;
+}
+
 
 body {
 	background-color: black;
