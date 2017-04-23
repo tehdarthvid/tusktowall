@@ -15,29 +15,31 @@
 </head>
 
 <body>
-	<div id="header">
-		<div class="button-group">
-			<div id="divDebug"></div>
+
+	<div class="headerbar" id="headerbar">
+		<div class="headerleft" id="headerleft">
+			<button id="btnIsPolling" class="button">-</button>
 			<button id="btnNSFW" class="button">#sfw</button>
 			<button id="btnLocal" class="button">local</button>
 		</div>
-		<div class="inputInstance">
-			<form>
-				&nbsp
-				<input id="ebInstance" class="editbox" type="text" name="instance">
-				<button id="btnInstanceGo" class="button">go</button>
-			</form>
-		</div>
-		<div class="navLinks">
-			<a href="http://timeline.darthvid.com" target="_blank">timeline</a>
-			<a href="http://darthvid.com" target="_blank">darthvid.com</a>
-			<a href="https://niu.moe/@darthvid" target="_blank">@darthvid@niu.moe</a>
+		<form id="ebinstancebar">
+			<input id="ebInstance" class="editbox" type="text" name="instance">
+			<button id="btnInstanceGo" class="button">go</button>
+		</form>
+		<div class="headerright" id="headerright">
+			<div class="navLinks">
+				<a href="http://darthvid.com" target="_blank">[website]</a>
+				<a href="https://niu.moe/@darthvid" target="_blank">[@darthvid]</a>
+			</div>
 		</div>
 	</div>
+
 	<div id="content" class="grid"></div>
+
 	<script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
 	<script src="https://unpkg.com/isotope-packery@2/packery-mode.pkgd.js"></script>
 	<script src="js/index.js"></script>
+
 </body>
 
 </html>
