@@ -24,7 +24,6 @@ img:hover {
 
 .editbox {
 	margin-bottom: 5px;
-	margin-left: 5px;
 }
 
 .inputInstance {
@@ -38,6 +37,7 @@ img:hover {
 
 #headerleft {
 	float: left;
+	margin-right: 5px;
 }
 
 #ebinstancebar {
