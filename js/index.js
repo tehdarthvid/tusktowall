@@ -158,10 +158,11 @@ function appendContent(content) {
 
 function controlNumImg(){
 	var numImagesSofar = grid.childElementCount;
-	var numImagesThisRound = 0;
+	var numImagesThisRound = -1;
 	var numChild = numImagesSofar;
 	var heightLine = screen.height * 1.5;
 	if (grid.clientHeight > heightLine) {
+		numImagesThisRound = 0;
 		var currChild = grid.lastChild;
 		var lastChild = currChild;
 		var prevChild = currChild.previousSibling;
@@ -179,10 +180,12 @@ function controlNumImg(){
 		console.log("img -" + numImagesThisRound + " (" + numImagesSofar + ")");
 	}
 	//layout.layout();
+	return numImagesThisRound;
 }
 
 function backfillWall() {
 	if ((1 < oldestTootID) && (grid.clientHeight < screen.height)){
+//		console.log("backfill");
 		addImagesFromToots(oldestTootID);
 	}
 }
@@ -232,6 +235,7 @@ function addTootsMedia(json, isAppend = false) {
 	}
 	if ((null == oldestTootID) && (0 < json.length)) {
 		oldestTootID = json[json.length-1].id;
+//		console.log("init old toot");
 	}
 	if ((0 < json.length) && (oldestTootID > json[json.length-1].id)) {
 		oldestTootID = json[json.length-1].id;
@@ -392,9 +396,10 @@ function runLoop() {
 		ctrCurrAdded = 0;
 		if (isPolling) {
 			$("#btnIsPolling").html('-');
-			controlNumImg();
 			addImagesFromToots();
-			backfillWall();
+			if (0 > controlNumImg()) {
+				backfillWall();
+			}
 		}
 	}, msReload);
 }
