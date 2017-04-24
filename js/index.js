@@ -1,11 +1,10 @@
 /* by @darthvid@niu.moe, (c) 2017 */
 
+var strVersion = "1.3.0.3-rc1";
 // lib convenience vars
-//var grid = document.querySelector('.grid');
-var grid = document.getElementById('content');
-
+var grid = document.getElementById("content");
 var layout = new Isotope(grid, {
-		itemSelector: '.grid-item',
+		itemSelector: ".grid-item",
 		layoutMode: 'packery',
 		packery: {
 			gutter: 5
@@ -38,6 +37,9 @@ window.onload = function() {
 
 
 function initThisThang() {
+	var div = document.getElementById("version");
+	div.innerHTML = "<div>v" + strVersion + "</div>";
+	
 	setParamsFromURL();
 	document.title = "#tusktowall: " + urlMastoInstance;
 	console.log("https://" + urlMastoInstance + "/api/v1/timelines/public"

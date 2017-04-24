@@ -46,6 +46,12 @@ img:hover {
 
 #headerright {
 	float: right;
+	margin-left: 5px;
+}
+
+#version {
+	float: right;
+	color: white;
 }
 
 #headerbar:after {
