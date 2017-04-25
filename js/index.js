@@ -1,6 +1,6 @@
 /* by @darthvid@niu.moe, (c) 2017 */
 
-var strVersion = "1.3.0.3-rc1";
+var strVersion = "1.3.0.4-rc1";
 // lib convenience vars
 var grid = document.getElementById("content");
 var layout = new Isotope(grid, {
@@ -14,6 +14,7 @@ var layout = new Isotope(grid, {
 // "constants" (but may change :P)
 var msReload = 6000;
 var listBlockTags = ['NSFW', 'EROE', 'EROGE', 'おっぱい'];
+var minNumImages = 40;
 
 // QueryParams
 var urlMastoInstance = "";
@@ -163,12 +164,12 @@ function controlNumImg(){
 	var numImagesThisRound = -1;
 	var numChild = numImagesSofar;
 	var heightLine = screen.height * 1.5;
-	if (grid.clientHeight > heightLine) {
+	if ((minNumImages < numImagesSofar) && (grid.clientHeight > heightLine)) {
 		numImagesThisRound = 0;
 		var currChild = grid.lastChild;
 		var lastChild = currChild;
 		var prevChild = currChild.previousSibling;
-		while (prevChild && (20 < numChild)) {
+		while (prevChild && (minNumImages < numChild)) {
 			if ((currChild.getBoundingClientRect().top + window.scrollY) > heightLine) {
 				var tempChild = lastChild.previousSibling;
 				layout.remove(lastChild);
@@ -186,7 +187,8 @@ function controlNumImg(){
 }
 
 function backfillWall() {
-	if ((1 < oldestTootID) && (grid.clientHeight < screen.height)){
+	if ((1 < oldestTootID) && 
+		((minNumImages > grid.childElementCount) || (grid.clientHeight < screen.height))) {
 //		console.log("backfill");
 		addImagesFromToots(oldestTootID);
 	}
