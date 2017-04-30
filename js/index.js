@@ -1,6 +1,6 @@
 /* by @darthvid@niu.moe, (c) 2017 */
 
-var strVersion = "1.3.0.4-rc1";
+var strVersion = "1.4.0-rc1";
 // lib convenience vars
 var grid = document.getElementById("content");
 var layout = new Isotope(grid, {
@@ -28,6 +28,13 @@ var isPolling = true;
 //globals
 var oldestTootID = null;
 var ctrCurrAdded = 0;
+var modalRatio = 0.85;
+var isModalGotoClicked = false;
+
+var modalZoom = document.getElementById('modalZoom');
+var modalImg = document.getElementById("imgZoom");
+var modalTxt = document.getElementById("txtModal");	
+
 
 window.onload = function() {
 	initThisThang();
@@ -48,25 +55,38 @@ function initThisThang() {
 	setVisibilityNSFW(isVisibleNSFW);
 	setLocalTimeline(isLocalTimeline);
 	regEventHandlers();
+			
 	if (isDebugMode) {
 		initDebug();
 	}
 }
 
 function initDebug() {
-	/*
-	var btnIsPolling= document.createElement('button');
-	btnIsPolling.innerHTML = "-";
-	btnIsPolling.id = "btnIsPolling";
-	btnIsPolling.onclick = togglePolling;
-	document.getElementById("headerleft").insertBefore(btnIsPolling, document.getElementById("headerleft").firstChild);
-	*/
 }
 
 function regEventHandlers() {
 	document.getElementById("btnIsPolling").addEventListener("click", togglePolling);
 	document.getElementById("btnNSFW").addEventListener("click", toggleNSFW);
 	document.getElementById("btnLocal").addEventListener("click", toggleLocal);
+	$('#content').on('click', '.grid-img', clickImg);
+	$(document).keyup(function(e) { 
+		if (e.keyCode == 27) { 
+			document.getElementById('modalZoom').style.display = 'none';
+		} 
+	});
+	document.getElementById('modalZoom').onclick = function()
+	{
+		console.log("isModalGotoClicked = " + isModalGotoClicked);
+		if (!isModalGotoClicked) {
+			modalZoom.style.display = "none";
+		}
+		isModalGotoClicked = false;
+//		console.log("main modal clicked");
+	}
+	document.getElementById('cbtnZoom').onclick = function()
+	{
+		modalZoom.style.display = "none";
+	}
 }
 
 function isNSFW(toot) {
@@ -77,7 +97,6 @@ function isNSFW(toot) {
 				boolNSFW = true;
 				console.log("found " + tag.name.toUpperCase() + "!");
 			}
-//			console.log(tag.name.toUpperCase());
 		});
 	}
 	return boolNSFW;
@@ -96,6 +115,38 @@ function togglePolling() {
 	isPolling = !isPolling;
 	setPolling(isPolling);
 	console.log("polling: " + isPolling);
+}
+
+function clickImg() {
+	img = this;
+//	console.log(img.src);
+	modalZoom.style.display = "block";
+   modalImg.src = this.src;
+   modalTxt.innerHTML = "<a href='" + img.textContent 
+   	+ "' target='_blank' onclick='isModalGotoClicked = true;'>[open toot]</a>";
+//   console.log(img.textContent);
+   
+   windowWidth = $(window).width();
+   windowHeight = $(window).height();
+   var newWidth = Math.floor(windowWidth * modalRatio);
+//   console.log(windowWidth + " -> " + newWidth);
+	var newHeight = getImgHfromW(img, newWidth);
+   
+   if (newHeight > (windowHeight * modalRatio)) {
+   	modalImg.width = getImgWfromH(img, (windowHeight * modalRatio));
+//   	console.log(newHeight + " -> " + (windowHeight * modalRatio));
+   }
+   else {
+   	modalImg.width = newWidth;
+   }
+}
+
+function getImgHfromW(img, width) {
+	return Math.floor((img.height * width) / img.width);
+}
+
+function getImgWfromH(img, height) {
+	return Math.floor((img.width * height) / img.height);
 }
 
 
@@ -125,7 +176,7 @@ function setPolling(isPoll) {
 	if (isPoll) {
 		$("#btnIsPolling").html('-');
 	} else {
-		$("#btnIsPolling").html("x");
+		$("#btnIsPolling").html("X");
 	}
 }
 
@@ -289,13 +340,15 @@ function addResizedImages(img, toot, isAppend = false) {
 			var div = document.createElement("div");
 			var strTagNSFW = "SFW";
 			var link = document.createElement("a");
-			link.setAttribute("href", toot.url);
-			link.setAttribute("target", "_blank");
+//			link.setAttribute("href", toot.url);
+//			link.setAttribute("target", "_blank");
 			div.id = srcImg;
 
 			var [newWidth, newHeight] = computeScaledImgDimensions(img);
 	//		console.log(newWidth + " x " + newHeight);
 			img.width = newWidth;
+			img.textContent = toot.url;
+//			console.log("innerimage " + img.textContent);
 		
 			if (isNSFW(toot)) {
 				strTagNSFW = "NSFW";
@@ -316,11 +369,12 @@ function addResizedImages(img, toot, isAppend = false) {
 				div.className = "grid-NSFW ";
 			}
 		
-			img.className = "img" + strTagNSFW;
+			img.className = "grid-img img" + strTagNSFW;
 		
-			link.appendChild(img);
+//			link.appendChild(img);
 			div.className = div.className + "grid-item";
-			div.appendChild(link);
+//			div.appendChild(link);
+			div.appendChild(img);
 			if (isAppend) {
 				appendContent(div);
 			}
